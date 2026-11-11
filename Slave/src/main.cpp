@@ -2,6 +2,7 @@
 #include <ESP32SPISlave.h>
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
+#include "esp_wpa2.h"
 
 // configs do MQTT
 
@@ -9,13 +10,24 @@ WiFiClientSecure wifi;
 PubSubClient mqtt(wifi);
 
 // WiFi
-const char *ssid = "NICOLAS-GAIN";
-const char *password = "senha123";
+const char *ssid = "ws_wlan";
+
+const char *identidade = "20241ceca0204";
+const char *nome_user = "20241ceca0204";
+const char *password = "@Academico123";
+
+// const char *ssid = "iPhone de Matheus";
+// const char *password = "matheus123";
 // const char *ip = "broker.hivemq.com";
 // const int port = 1883;
-const int port = 8884;
+const uint16_t port = 8883;
 const char *ip = "humblecuckoo-90269042.a01.euc1.aws.hivemq.cloud";
-const char *topic = "trabalho/temperatura";
+const char *topic = "datacom/temp";
+
+const char *user = "datacom";
+const char *pass = "Datacom12";
+
+String id = "esp32-" + WiFi.macAddress();
 
 ESP32SPISlave slave; // criar o objeto da classe
 
@@ -23,22 +35,21 @@ static constexpr uint8_t BUFFER_SIZE{4};
 uint8_t spi_slave_tx_buf[BUFFER_SIZE];
 uint8_t spi_slave_rx_buf[BUFFER_SIZE];
 
-void reconnect(String temp)
+void reconnect()
 {
   // Loop until we're reconnected
   while (!mqtt.connected())
   {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (mqtt.connect("esp32-trabalho-comdata"))
+    if (mqtt.connect(id.c_str(), user, pass))
     {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      mqtt.publish(topic, temp.c_str());
     }
     else
     {
-      Serial.print("failed, rc=");
+      Serial.print("failed, rc = ");
       Serial.print(mqtt.state());
       Serial.println(" try again in 1 seconds");
       // Wait 5 seconds before retrying
@@ -50,9 +61,17 @@ void reconnect(String temp)
 void setup()
 {
   Serial.begin(115200);
-  delay(1000);
+  delay(200);
 
-  WiFi.begin(ssid, password);
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_STA);
+  esp_wifi_sta_wpa2_ent_set_identity((uint8_t *)identidade, strlen(identidade));
+  esp_wifi_sta_wpa2_ent_set_username((uint8_t *)nome_user, strlen(nome_user));
+  esp_wifi_sta_wpa2_ent_set_password((uint8_t *)password, strlen(password));
+  esp_wifi_sta_wpa2_ent_enable();
+
+  WiFi.begin(ssid);
+
   while (WiFi.status() != WL_CONNECTED)
     delay(200);
   Serial.println("Conectado ao Hotspot.");
@@ -85,8 +104,9 @@ void loop()
 
     if (!mqtt.connected())
     {
-      reconnect(tempStr);
+      reconnect();
     }
+    mqtt.publish(topic, tempStr.c_str());
     mqtt.loop();
   }
 }
