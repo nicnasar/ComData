@@ -12,20 +12,15 @@ PubSubClient mqtt(wifi);
 // WiFi
 const char *ssid = "ws_wlan";
 
-const char *identidade = "20241ceca0204";
-const char *nome_user = "20241ceca0204";
-const char *password = "@Academico123";
-
-// const char *ssid = "iPhone de Matheus";
-// const char *password = "matheus123";
-// const char *ip = "broker.hivemq.com";
-// const int port = 1883;
+const char *identidade = "matricula";
+const char *nome_user = "matricula";
+const char *password = "senha";
 const uint16_t port = 8883;
-const char *ip = "humblecuckoo-90269042.a01.euc1.aws.hivemq.cloud";
-const char *topic = "datacom/temp";
+const char *ip = "ip";
+const char *topic = "topico";
 
-const char *user = "datacom";
-const char *pass = "Datacom12";
+const char *user = "user";
+const char *pass = "senha2";
 
 String id = "esp32-" + WiFi.macAddress();
 
